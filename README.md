@@ -1,2 +1,2 @@
-# CU Boulder Class Note
- Collage Class note
+# CU Boulder class Note
+ Collage class note
