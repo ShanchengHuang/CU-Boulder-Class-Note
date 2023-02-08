@@ -63,11 +63,3 @@ Stack point R4
         ```
 - Task priority
 - Taks control block
-
-
-  
-
-
-
-
-
