@@ -55,7 +55,7 @@ Stack point R4
 
 ## Creating Task
 
-- Reserve from task stck
+- Reserve amount of memory from task stck
 - Task name
 - Entry Point
     -   ```
@@ -63,3 +63,30 @@ Stack point R4
         ```
 - Task priority
 - Taks control block
+- Initialization options
+
+
+> Static - in this case makes the variable visible only inside the current file  
+
+> Volatile - it is information for the compiler that the object can be changed by something outside the normal execution path (for example, the interrupt routine)
+
+
+## Starting the Micrium os
+
+```
+OSInit(&err);
+// create the os system task like idle, tick
+
+OSTaskCreate(&err);
+
+OSStart(&err);
+// start the os 
+// schedules
+// void
+```
+
+**Task States**
+- Running -(yield/reschedule)> Ready
+- Blocked
+- Ready  
+
