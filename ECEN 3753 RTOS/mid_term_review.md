@@ -1,0 +1,282 @@
+## Topic 1:
+
+- Scheduling and Execution
+  - Bootstrapping
+  - Scheduling and Execution
+  - Debugging
+- Debugging:
+  - If/when things go off the rails and there’s a train wreck before your eyes, think back to what happened BEFORE.
+- What is OS
+  - Encapsulated/standardized access to system resources
+  - Means to exclusively-use some resources
+  - Communication methods between requestors for sharing work and resources
+  - Security between data users when sharing is not appropriate
+  - Board Support Package (BSP) is not technically part of, but is usually provided with a RTOS, to encapsulate the hardware available in a particular embedded system
+  - OS Boot Sequence
+    - Processor fetches code from ROM at boot address
+       - May be slow
+       - Interrupts are off, Exception table in ROM
+    - Initialize GPIO
+       - Minimalist User Interface (UI) configured for reporting catastrophic boot errors before “full” UI (LEDs, beeps)
+    - Adjust clocks
+       - Sometimes transitioning to faster execution
+    - Initialize / test memories
+    - Load any more code into RAM (from other places, possibly requiring additional initialization. . . )
+       - Decompress if needed
+         - Under what constraints would compression make sense?
+       - Run from RAM
+    - “Real-Time” means that a system is deterministic. That is, it will consistently meet all of the required time limits.
+- What is a Non-RT OS missing?
+- General Purpose Input/Output (GPIO)
+- Interrupts
+- Timer Services
+
+## Topic 2: Tasks
+- What Is A Task
+- Processes
+  - Heavyweight (relatively) unit of program execution.
+  - Typically used in virtual memory systems and paged in to switch between processes.
+  - Owns its own memory space, including heap. Windows ‘.exe’ (after it has started running)
+- Threads
+  - Lightweight (relatively) unit of program execution.
+  - A process may spawn one or more threads.
+  - Threads share the memory space (including global data) of their parent process, but have separate stacks for program execution.
+  - TEND to be aligned more to concurrent subtasks
+- Tasks
+  - Lightweight unit of program execution, very similar to a thread.
+  - TEND to align with less-concurrent subtasks in real-time, but allowing decoupling
+- Diagram an algorithm 
+  - Data Flow Diagram (shows data between processing entities)
+  - State Machine Diagram (shows (task) states, what transitions are caused by and effects)
+  - Sequence Diagram (good to formally capture your use cases)
+- Resources That A Program Needs To Execute
+- Task Stack
+- Stack Frames
+- ARM Application Binary Interface
+- Starting the Micrium OS
+- Task States
+  - RUNNING
+  - BLOCKED
+  - READY
+
+## Topic 2.5: Diagramming And Unit Tests
+- Why do we diagram?
+- Structure Diagram: 
+  - Repeatedly divides a problem into smaller and smaller pieces
+    - Useful for communicating top-down or bottom-up design
+- Data Flow Diagram: 
+  - Data and Transformations on data
+  - The basis for what we call a Task Diagram, where:
+    - Tasks are the “Transformations” 
+    - Shared data and Inter-Task Communications are the “Data” 
+  - Helps us see where data interfaces might be more obvious for unit test boundaries
+- State (Machine) Diagram: 
+  - States and transitions/triggers 
+  - Sometimes very useful to help analyze different states of critical data that may align with triggering of data transformations
+- Sequence Diagram: 
+  - How parts of a system do their part (computation or signaling) to fulfill a use case’s demands
+  - Optional example perusal:
+    - SoftwareIdeas.net: Sequence-Diagrams
+- Top-Down vs. Bottom-Up Design
+- Targeting Appropriate Unit Testing
+- Why Unit Test?
+## Topic 3:Scheduling
+- Why have scheduling?
+  - Need ability to share resources between multiple Tasks
+  - OS decides what to run next
+  - Between decisions, OS needs to prepare the old and new Task
+    - Context Switching
+- Scheduling Goals:
+  - Maximize throughput
+  - Maximize how resources are utilized 
+  - Minimize response time
+  - Minimize wait time
+  - Minimize time it takes to start a new task
+  - Share resources appropriately
+- Criteria for Scheduling
+  - CPU Utilization
+  - Response Time
+  - Turnaround Time
+  - Waiting Time
+  - Throughput(Turnaround = Waiting + Execution)
+- Non Preemptive Scheduling
+  - Simplicity
+  - Determinism
+  - Poor responsiveness
+  - Inability to handle real-time events
+  - Risk of deadlock
+- Context Switching
+  - Required for preemptive scheduling
+  - Allows the “pausing” of a Task
+  - Current Task’s information is stored for later retrieval
+  - The time it takes to store and retrieve is known as **Context Switch Time**
+- First-Come, First-Served
+- Shortest Job First
+- Time Slice
+- Time Slice with Background Tasks
+- Round Robin
+- Priority
+
+## Topic3.5: Capacitive Sensing
+- Capacitive Analogies
+  - $f = \frac{1}{2\pi \sqrt{LC}}$
+- Low-Power was Key for the SDK Examples
+- OS_tick Resolution:
+  - Too small: we’ll have a precise and more accurate timebase, but will potentially spend more time context-switching
+  - Too large: we’ll either lose accuracy in our measured frequency, or need to poll to synch up to the timer.
+
+## Topic 4:Memory Management
+- Types of Memory 
+  - Volatile: lose info on power of
+    - Random Access Memory (RAM), Electrical read/write data
+    - DRAM (Dynamic RAM)
+    - SRAM (Static RAM)
+  - Non-Volatile: retain info on power of
+    - Info not erasable
+      - Mask Programmable Read-only Memory (ROM)
+    - Info written electrically but not electrically erasable
+      - Erasable Programmable ROM (EPROM)
+    - Info written and erased electrically
+      - Electrically Erasable Programmable ROM (EEPROM)
+      - Flash (NAND, NOR)
+    - SRAM vs DRAM
+    - CPU time vs Memory access time
+
+- Caching works by two principles:
+- Temporal locality:
+  - if a program accesses one memory address, there is a good chance that it will access the same address again.
+- Spatial locality:
+  - if a program accesses one memory address, there is a good chance that it will access other nearby addresses.
+
+- Caching basics
+  - Cache Hit 
+    - the cache contains the data/code that the program is looking for 
+    - good: data/code is accessed faster in cache than main memory 
+  - Cache Miss 
+    - the cache does not contain the data/code that the program is looking for 
+    - bad: CPU has to wait for the data/code from slower main memory 
+  - Goal for HW and SW engineer: 
+    - Improve Cache Hit Rate 
+    - Speculative execution pipeline 
+    - Branch taken/not-taken variants 
+    - Coding choices (loops, data structures)
+
+
+- Caching Heap vs. Stack 
+  - Stack 
+    - LIFO (last in, first out) 
+    - Limit on size (specified when task is created) 
+    - Managed efficiently by CPU 
+    - Store local varialables 
+    - Stack usage grows and shrinks (as functions push and pop variables)
+    - Stack Overflow 
+      - Long function call path 
+      - Recursive function 
+      - Large local variables (e.g. big array) 
+      - Overly stingy SoC planners
+  - Heap 
+    - Variable can be accessed globally 
+    - No limit on size Managed by programmer (allocating and freeing variable) 
+    - Slower access (Relatively) 
+    - Memory leak (allocated but not released by programmer) 
+    - Fragmented (more to come)
+    
+- Static vs. Dynamic Allocation (P20)
+- Debug Stack Issues 
+  - Fragmented Memory
+  - Secure Memory Allocation
+  - Memory Protection Unit
+- Address Heap Issues 
+- Virtual Memory
+  - Virtual Memory is handled by MMU while in memories
+  - Virtual Memory needs HW (MMU) and SW (OS to set it up) support
+  - Same virtual address for different tasks is mapped to different physical addresses
+
+
+## Topic 5: Inter-Task Communication (MSG)
+- Types of Shared Resources (4)
+  - Memory
+  - Files
+  - On-Board Peripherals
+  - External Hardware Devices
+  -  Mutual Exclusion: Prevent multiple tasks from accessing a shared resource simultaneously
+  -  Resolving Conflicts(6)
+   -  IPC: Allow entities to communicate with each other to minimize direct conflict (Inter-Process (or Task) Communication)
+      -  Condition Flag(10)
+      -  Semaphore(12)
+      -  Events(21)
+      -  Signal(26) Both tasks are senders and receivers
+      -  Pool(30)
+      -  Message Queue(31)
+      -  Mailbox
+
+## Topic 6:Shared Resources
+- Data Races
+  - Generally occur when the order of CPU stores (writes) and loads (reads) are non-deterministic
+  - The Solution to Data Races
+    - Atomic Lock
+    - Volatile in c/c++
+      - Does not prevent data races. 
+      - Used to prevent the compiler from optimizing out a read|write.
+        - Memory mapped HW peripherals
+    - Atomic in C/C++ 
+      - Can be used to prevent data races. 
+      - Helps enforce an order on loads/stores to memory 
+        - A happens before B (e.g. enumerated steps) 
+        - A synchronizes with B (e.g. indicator to block B)
+    - What is Test_And_Set?(8)
+    - Design Pattern: Critical Sections
+      - Enter critical region 
+        - Access shared resources 
+      - Exit critical region
+- Mutual Exclusion Strategies
+  -  Mutex (12)
+  -  Semaphore (binary) (15)
+  -  Disable interrupts (17)
+  -  Disable the OS scheduler(18)
+- Deadlock
+  - Preventing Deadlock (21)
+  - Always acquire locks in the same order throughout the system
+  - Always release locks in the reverse order that they were
+  - Avoid creating circular dependencies between tasks. (More on this in a couple lectures)
+acquired.
+
+- Priority Inversion
+  - Priority Inheritance(23)
+- Shared Resource Programming Mistakes(24)
+
+## Topic 7:Risk
+- Risk Types
+  - Risks are not just technical in nature (development unknowns, component failures), though they often are in our context Head Assisted Magnetic Recording Heads for HDD 5+ years from Demo to “Commercial Production” 11 years from materials science doctorate to Demo, with lots of ablation! 
+  - Human Factors (illness, accidents, major life events, burnout, size of currently-available talent pool) 
+  - Business Flow (Supply Chains, drug/trade/political wars) 
+  - “Acts of God”
+- Pareto Chart (80/20 rule)
+- Agile Numbering
+- Risk Status: ROAM your risks
+  - Resolved Truly, these are no longer risks. They may have occurred or not, but there is no remaining risk. 
+  - Owned These might happen, but we’ve got no plan yet. Whoever Owns a risk is seeking a mitigation or positive resolution. 
+  - Accepted These are going to hurt if they occur, but no further mitigation is deemed worth the price. 
+  - Mitigated You’ve used your trained optimization skills to find ways to either reduce the P or I scores to the point that the remainder is another, lesser-valued risk.
+- Risk Register(11)
+- Control Loop Risks
+- Common Chain of Causes to Variable Latency(13)
+  - Control-Loop Latency Mitigation(14)
+
+## Topic 8: Real time Risk Mitigations(ARM Interrupt Optimizations, Priority Inheritance, Execution Complexity, RMA Rate Monotonic Analysis)
+
+- Control Loop Latency
+  - We looked at compensation for hold-off
+  - More mitigation with Interrupt Optimizations
+- Deadlock
+  - We have looked at Shared Data mitigation
+  - Resource contention mitigation with Priority Inheritance
+- Execution Complexity
+  - How “completely-testable” is my system? and what can help?
+- Scheduling Guarantees
+  - Can I be assured of deadline conformance? **Rate Monotonic Analysis (RMA)**
+- ARM NVIC vs. GIC Banking(6)
+- Priority Inheritance
+- Register Banking: For Control Loop Latency Mitigation
+  - In a microcontroller or processor, registers are the fastest and most convenient way to hold temporary data during program execution. However, when multiple tasks or threads need to share the same processor, there is a need to save and restore the values in the registers during context switches between tasks.
+- Rate Monotonic Scheduling(47)
